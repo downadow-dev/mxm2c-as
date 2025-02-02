@@ -579,9 +579,9 @@ void preprocess(char *s_buf) {
     int lrblock = 0;
     
     for(char *p = s_buf; *p; p++) {
-        if((*p == '<' || *p == '%') && !isspace(p[1]))
+        if((*p == '<' || *p == '%') && !isspace(p[1]) !lrblock)
             lrblock = 1;
-        else if((*p == '>' || *p == '%') && !isspace(p[-1]))
+        else if((*p == '>' || *p == '%') && !isspace(p[-1]) && lrblock)
             lrblock = 0;
         
         if(!lrblock) {
@@ -603,9 +603,9 @@ void preprocess(char *s_buf) {
     lrblock = 0;
     
     for(char *p = s_buf; *p;) {
-        if((*p == '<' || *p == '%') && !isspace(p[1]))
+        if((*p == '<' || *p == '%') && !isspace(p[1]) && !lrblock)
             lrblock = 1;
-        else if((*p == '>' || *p == '%') && !isspace(p[-1]))
+        else if((*p == '>' || *p == '%') && !isspace(p[-1]) && lrblock)
             lrblock = 0;
         
         if(!lrblock) {
