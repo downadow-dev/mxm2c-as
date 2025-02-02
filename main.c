@@ -579,7 +579,7 @@ void preprocess(char *s_buf) {
     int lrblock = 0;
     
     for(char *p = s_buf; *p; p++) {
-        if((*p == '<' || *p == '%') && !isspace(p[1]) !lrblock)
+        if((*p == '<' || *p == '%') && !isspace(p[1]) && !lrblock)
             lrblock = 1;
         else if((*p == '>' || *p == '%') && !isspace(p[-1]) && lrblock)
             lrblock = 0;
