@@ -84,9 +84,6 @@ int main(int argc, char **argv) {
                 strcmp(instr, "inc") == 0 ||
                 strcmp(instr, "dec") == 0 ||
                 strcmp(instr, "tnp") == 0 ||
-                strcmp(instr, "th1") == 0 ||
-                strcmp(instr, "th2") == 0 ||
-                strcmp(instr, "th3") == 0 ||
                 strcmp(instr, "time") == 0 ||
                 strcmp(instr, "jmp") == 0) i += 2;
         else if(strcmp(instr, "vld") == 0) {
@@ -485,18 +482,6 @@ int main(int argc, char **argv) {
             app[i++] = r1;
             app[i++] = rdst;
             app[i++] = -30;
-        }
-        else if(strcmp(instr, "th1") == 0) {
-            app[i++] = atoi(s);
-            app[i++] = -32;
-        }
-        else if(strcmp(instr, "th2") == 0) {
-            app[i++] = atoi(s);
-            app[i++] = -33;
-        }
-        else if(strcmp(instr, "th3") == 0) {
-            app[i++] = atoi(s);
-            app[i++] = -34;
         }
         else if(strcmp(instr, "time") == 0) {
             app[i++] = atoi(s);
