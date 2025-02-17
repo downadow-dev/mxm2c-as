@@ -20,7 +20,7 @@ struct as_entry {
 struct as_entry *labels;
 struct as_entry *refs;
 
-void preprocess(char *);
+int preprocess(char *);
 
 int main(int argc, char **argv) {
     if(argc < 3) {
@@ -152,7 +152,15 @@ int main(int argc, char **argv) {
     for(i = 4; fgets(buf, sizeof(buf), f);) {
         char *s = buf;
         
-        preprocess(s);
+        int status = preprocess(s);
+        switch(status) {
+        case -1:
+            fprintf(stderr, "preprocess() warning (unknown label): %s\n", s);
+            break;
+        case -2:
+            fprintf(stderr, "preprocess() warning (unknown def): %s\n", s);
+            break;
+        }
         
         if(*s == '\0')
             continue;
@@ -250,7 +258,7 @@ int main(int argc, char **argv) {
                 app[i++] = atoi(s + strlen(s) + 1);
                 app[i++] = -5;
             } else {
-                char tmp[8];
+                char tmp[64];
                 app[i++] = atoi(s);
                 sprintf(tmp, "%07d", i + 3);
                 for(int j = 6; j > 1; j--) {
@@ -272,7 +280,7 @@ int main(int argc, char **argv) {
                 app[i++] = atoi(s + strlen(s) + 1);
                 app[i++] = -6;
             } else {
-                char tmp[8];
+                char tmp[64];
                 app[i++] = atoi(s);
                 sprintf(tmp, "%07d", i + 3);
                 for(int j = 6; j > 1; j--) {
@@ -296,7 +304,7 @@ int main(int argc, char **argv) {
                 app[i++] = (last[0] - '0') * 10 + (last[1] - '0');
                 app[i++] = -8;
             } else {
-                char tmp[8];
+                char tmp[64];
                 app[i++] = atoi(last);
                 sprintf(tmp, "%07d", i + 4);
                 for(int j = 6; j > 1; j--) {
@@ -319,7 +327,7 @@ int main(int argc, char **argv) {
                     app[i++] = last[j] - '0';
                 app[i++] = -9;
             } else {
-                char tmp[8];
+                char tmp[64];
                 app[i++] = atoi(last);
                 sprintf(tmp, "%07d", i + 4);
                 for(int j = 6; j > 1; j--) {
@@ -342,7 +350,7 @@ int main(int argc, char **argv) {
                     app[i++] = last[j] - '0';
                 app[i++] = -36;
             } else {
-                char tmp[8];
+                char tmp[64];
                 app[i++] = atoi(last);
                 sprintf(tmp, "%07d", i + 4);
                 for(int j = 6; j > 1; j--) {
@@ -535,7 +543,7 @@ int main(int argc, char **argv) {
     }
     fclose(f);
     
-    if(!(f = fopen(argv[2], "w"))) {
+    if(!(f = fopen(argv[2], "wb"))) {
         perror("fopen");
         exit(EXIT_FAILURE);
     }
@@ -547,7 +555,7 @@ int main(int argc, char **argv) {
 }
 
 // преобразовать в s_buf имена меток и именованных констант в их значения и др.
-void preprocess(char *s_buf) {
+int preprocess(char *s_buf) {
     while(isspace(*s_buf))
         memmove(s_buf, s_buf + 1, strlen(s_buf + 1) + 1);
     
@@ -559,7 +567,7 @@ void preprocess(char *s_buf) {
     }
     
     if(*s_buf && s_buf[strlen(s_buf) - 1] == ':')
-        return;
+        return 0;
     
     int lrblock = 0;
     
@@ -605,7 +613,7 @@ void preprocess(char *s_buf) {
     }
     
     for(char *p = s_buf; *p; p++) {
-        if(*p == '<') {
+        if(*p == '<' && !isspace(p[1])) {
             char *endp;
             for(endp = p + 1; *endp; endp++) {
                 if(*endp == '>') {
@@ -618,11 +626,13 @@ void preprocess(char *s_buf) {
                         if(strcmp(ent->name, buf) == 0) {
                             memmove(p + strlen(ent->value), endp + 1, strlen(endp) + 1);
                             memcpy(p, ent->value, strlen(ent->value));
-                            break;
+                            goto labelok;
                         }
                     }
                     
-                    break;
+                    return -1;
+                    
+                    labelok: break;
                 }
             }
         } else if(*p == '%' && !(s_buf[0] == '.' && s_buf[1] == 'd' && s_buf[2] == 'e' && s_buf[3] == 'f')) {
@@ -639,13 +649,17 @@ void preprocess(char *s_buf) {
                             memmove(p + strlen(ent->value), endp + 1, strlen(endp) + 1);
                             memcpy(p, ent->value, strlen(ent->value));
                             preprocess(s_buf);
-                            break;
+                            goto defok;
                         }
                     }
                     
-                    break;
+                    return -2;
+                    
+                    defok: break;
                 }
             }
         }
     }
+    
+    return 0;
 }
