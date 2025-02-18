@@ -60,9 +60,8 @@ int main(int argc, char **argv) {
         
         /* заполнения для соответствия двоичному коду */
         if(strcmp(instr, "nop") == 0  || strcmp(instr, "off") == 0  ||
-           strcmp(instr, "updd") == 0 || strcmp(instr, "end") == 0  ||
-           strcmp(instr, "vrst") == 0 || strcmp(instr, "trst") == 0 ||
-           strcmp(instr, ".byte") == 0) i++;
+           strcmp(instr, "updd") == 0 || strcmp(instr, ".byte") == 0  ||
+           strcmp(instr, "vrst") == 0 || strcmp(instr, "trst") == 0) i++;
         else if(strcmp(instr, "if") == 0 && strstr(s, "&&")) i += 6;
         else if(strcmp(instr, "add") == 0 ||
                 strcmp(instr, "lshift") == 0 ||
@@ -77,8 +76,7 @@ int main(int argc, char **argv) {
                 strcmp(instr, "div") == 0 ||
                 strcmp(instr, "if") == 0) i += 4;
         else if(strcmp(instr, "mov") == 0 ||
-                strcmp(instr, "ld") == 0 ||
-                strcmp(instr, "sel") == 0) i += 3;
+                strcmp(instr, "ld") == 0) i += 3;
         else if(strcmp(instr, "slp") == 0 ||
                 strcmp(instr, "lslp") == 0 ||
                 strcmp(instr, "inc") == 0 ||
@@ -416,12 +414,6 @@ int main(int argc, char **argv) {
         else if(strcmp(instr, "jmp") == 0) {
             app[i++] = atoi(s);
             app[i++] = -18;
-        }
-        else if(strcmp(instr, "end") == 0)  app[i++] = -19;
-        else if(strcmp(instr, "sel") == 0) {
-            app[i++] = atoi(strsep(&s, " "));
-            app[i++] = atoi(strsep(&s, " "));
-            app[i++] = -20;
         }
         else if(strcmp(instr, "mul") == 0) {
             int r1 = atoi(strsep(&s, " "));
