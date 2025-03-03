@@ -28,9 +28,8 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
     
-    signed char *app = malloc(10000004);
-    memset(app, '\0', 10000004);
-    app[1] = 'X', app[2] = 'M', app[3] = '2'; // обязательная директива iiixmish2-программ
+    signed char *app = malloc(10000000);
+    memset(app, '\0', 10000000);
     
     labels = malloc(sizeof(struct as_entry));
     labels->next = NULL;
@@ -255,7 +254,7 @@ int main(int argc, char **argv) {
             } else {
                 char tmp[64];
                 app[i++] = atoi(s);
-                sprintf(tmp, "%07d", i + 3);
+                sprintf(tmp, "%07d", i + 7);
                 for(int j = 6; j > 1; j--) {
                     app[i++] = tmp[j] - '0';
                 }
@@ -277,7 +276,7 @@ int main(int argc, char **argv) {
             } else {
                 char tmp[64];
                 app[i++] = atoi(s);
-                sprintf(tmp, "%07d", i + 3);
+                sprintf(tmp, "%07d", i + 7);
                 for(int j = 6; j > 1; j--) {
                     app[i++] = tmp[j] - '0';
                 }
@@ -301,7 +300,7 @@ int main(int argc, char **argv) {
             } else {
                 char tmp[64];
                 app[i++] = atoi(last);
-                sprintf(tmp, "%07d", i + 4);
+                sprintf(tmp, "%07d", i + 8);
                 for(int j = 6; j > 1; j--) {
                     app[i++] = tmp[j] - '0';
                 }
@@ -324,7 +323,7 @@ int main(int argc, char **argv) {
             } else {
                 char tmp[64];
                 app[i++] = atoi(last);
-                sprintf(tmp, "%07d", i + 4);
+                sprintf(tmp, "%07d", i + 8);
                 for(int j = 6; j > 1; j--) {
                     app[i++] = tmp[j] - '0';
                 }
@@ -356,10 +355,10 @@ int main(int argc, char **argv) {
             app[i++] = op1;
             
             switch(type) {
-                case '=': app[i++] = -11; break;
-                case '!': app[i++] = -12; break;
-                case '>': app[i++] = -13; break;
-                case '<': app[i++] = -14; break;
+            case '=': app[i++] = -11; break;
+            case '!': app[i++] = -12; break;
+            case '>': app[i++] = -13; break;
+            case '<': app[i++] = -14; break;
             }
         }
         else if(strcmp(instr, "updd") == 0) app[i++] = -15;
@@ -436,13 +435,13 @@ int main(int argc, char **argv) {
             *p++ = '\0';
             *p++ = '\0';
             *strchr(p, '"') = '\0';
-            int j = atoi(s) + 4;
+            int j = atoi(s);
             while(*p) app[j++] = *p++;
             app[j] = '\0';
         }
         else if(strcmp(instr, ".skip") == 0) i += atoi(s);
         else if(strcmp(instr, ".orig") == 0) {
-            int new = atoi(s) + 4;
+            int new = atoi(s);
             if(i > new) fprintf(stderr, ".orig: warning: possible overflow\n");
             i = new;
         }
