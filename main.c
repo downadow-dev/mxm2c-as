@@ -143,7 +143,7 @@ int main(int argc, char **argv) {
     
     // перевод программы в машинный код
     int i;
-    for(i = 4; fgets(buf, sizeof(buf), f);) {
+    for(i = 0; fgets(buf, sizeof(buf), f);) {
         char *s = buf;
         
         int status = preprocess(s);
