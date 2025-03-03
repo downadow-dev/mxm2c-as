@@ -62,7 +62,6 @@ int main(int argc, char **argv) {
         if(strcmp(instr, "nop") == 0  || strcmp(instr, "off") == 0  ||
            strcmp(instr, "updd") == 0 || strcmp(instr, ".byte") == 0  ||
            strcmp(instr, "vrst") == 0 || strcmp(instr, "trst") == 0) i++;
-        else if(strcmp(instr, "if") == 0 && strstr(s, "&&")) i += 6;
         else if(strcmp(instr, "add") == 0 ||
                 strcmp(instr, "lshift") == 0 ||
                 strcmp(instr, "rshift") == 0 ||
@@ -70,7 +69,6 @@ int main(int argc, char **argv) {
                 strcmp(instr, "or") == 0 ||
                 strcmp(instr, "and") == 0 ||
                 strcmp(instr, "sub") == 0 ||
-                strcmp(instr, "exp") == 0 ||
                 strcmp(instr, "mod") == 0 ||
                 strcmp(instr, "mul") == 0 ||
                 strcmp(instr, "div") == 0 ||
@@ -92,11 +90,10 @@ int main(int argc, char **argv) {
             *strchr(s, ' ') = '\0';
             i += (strlen(s) < 3) ? 16 : 8;
         }
-        else if(strcmp(instr, "vsv") == 0 || strcmp(instr, "vsvan") == 0) i += (strlen(strchr(s, ' ') + 1) < 3) ? 14 : 6;
+        else if(strcmp(instr, "vsv") == 0) i += (strlen(strchr(s, ' ') + 1) < 3) ? 14 : 6;
         else if(strcmp(instr, "isv") == 0) i += (strlen(strchr(s, ' ') + 1) < 3) ? 16 : 8;
-        else if(strcmp(instr, "vstr") == 0) i += 6 + ((s + strlen(s) - 1) - strchr(s, '"') - 1);
-        else if(strcmp(instr, "mov2") == 0 || strcmp(instr, "mov3") == 0) i += 8;
-        else if(strcmp(instr, ".goto") == 0) i += strtol(s, NULL, 0);
+        else if(strcmp(instr, "mov2") == 0) i += 8;
+        else if(strcmp(instr, ".skip") == 0) i += strtol(s, NULL, 0);
         else if(strcmp(instr, ".orig") == 0) i = strtol(s, NULL, 0);
         // создание метки
         else if(instr[strlen(instr) - 1] == ':') {
@@ -339,29 +336,6 @@ int main(int argc, char **argv) {
                 app[i++] = -9;
             }
         }
-        else if(strcmp(instr, "vsvan") == 0) {
-            char *last = strchr(s, ' ') + 1;
-            *(last - 1) = '\0';
-            if(strlen(last) > 3) {
-                app[i++] = atoi(s);
-                for(int j = 3; j >= 0; j--)
-                    app[i++] = last[j] - '0';
-                app[i++] = -36;
-            } else {
-                char tmp[64];
-                app[i++] = atoi(last);
-                sprintf(tmp, "%07d", i + 4);
-                for(int j = 6; j > 1; j--) {
-                    app[i++] = tmp[j] - '0';
-                }
-                app[i++] = (tmp[0] - '0') * 10 + (tmp[1] - '0');
-                app[i++] = -8;
-                app[i++] = atoi(s);
-                for(int j = 0; j < 4; j++)
-                    app[i++] = 0;
-                app[i++] = -36;
-            }
-        }
         else if(strcmp(instr, "ld") == 0) {
             app[i++] = atoi(strsep(&s, " "));
             app[i++] = atoi(strsep(&s, " "));
@@ -372,39 +346,20 @@ int main(int argc, char **argv) {
             app[i++] = -10;
         }
         else if(strcmp(instr, "if") == 0) {
-            if(strstr(s, "&&")) {
-                int op1 = atoi(strsep(&s, " "));
-                strsep(&s, " ");
-                int op2 = atoi(strsep(&s, " "));
-                strsep(&s, " ");
-                int op3 = atoi(strsep(&s, " "));
-                strsep(&s, " ");
-                int op4 = atoi(strsep(&s, " "));
-                int rdst = atoi(strsep(&s, " "));
-                
-                app[i++] = rdst;
-                app[i++] = op4;
-                app[i++] = op3;
-                app[i++] = op2;
-                app[i++] = op1;
-                app[i++] = -37;
-            } else {
-                int op1 = atoi(strsep(&s, " "));
-                char type = *strsep(&s, " ");
-                int op2 = atoi(strsep(&s, " "));
-                int rdst = atoi(strsep(&s, " "));
-                
-                app[i++] = rdst;
-                app[i++] = op2;
-                app[i++] = op1;
-                
-                switch(type) {
-                    case '=': app[i++] = -11; break;
-                    case '!': app[i++] = -12; break;
-                    case '>': app[i++] = -13; break;
-                    case '<': app[i++] = -14; break;
-                    default : app[i++] = 0;   break;
-                }
+            int op1 = atoi(strsep(&s, " "));
+            char type = *strsep(&s, " ");
+            int op2 = atoi(strsep(&s, " "));
+            int rdst = atoi(strsep(&s, " "));
+            
+            app[i++] = rdst;
+            app[i++] = op2;
+            app[i++] = op1;
+            
+            switch(type) {
+                case '=': app[i++] = -11; break;
+                case '!': app[i++] = -12; break;
+                case '>': app[i++] = -13; break;
+                case '<': app[i++] = -14; break;
             }
         }
         else if(strcmp(instr, "updd") == 0) app[i++] = -15;
@@ -439,18 +394,6 @@ int main(int argc, char **argv) {
             app[i++] = atoi(s);
             app[i++] = -23;
         }
-        else if(strcmp(instr, "vstr") == 0) {
-            char *string = strchr(s, ' ');
-            *string++ = '\0';
-            *string++ = '\0';
-            *strchr(string, '"') = '\0';
-            for(int j = strlen(string) - 1; j >= 0; j--)
-                app[i++] = string[j];
-            app[i++] = strlen(string);
-            for(int j = 3; j >= 0; j--)
-                app[i++] = s[j] - '0';
-            app[i++] = -25;
-        }
         else if(strcmp(instr, "inc") == 0) {
             app[i++] = atoi(s);
             app[i++] = -26;
@@ -473,16 +416,6 @@ int main(int argc, char **argv) {
             app[i++] = rdst;
             app[i++] = -29;
         }
-        else if(strcmp(instr, "exp") == 0) {
-            int r1 = atoi(strsep(&s, " "));
-            int r2 = atoi(strsep(&s, " "));
-            int rdst = atoi(strsep(&s, " "));
-            
-            app[i++] = r2;
-            app[i++] = r1;
-            app[i++] = rdst;
-            app[i++] = -30;
-        }
         else if(strcmp(instr, "time") == 0) {
             app[i++] = atoi(s);
             app[i++] = -43;
@@ -496,24 +429,6 @@ int main(int argc, char **argv) {
             app[i++] = atoi(s);
             app[i++] = -31;
         }
-        else if(strcmp(instr, "mov3") == 0) {
-            int rdst = atoi(strsep(&s, " "));
-            int op1 = atoi(strsep(&s, " "));
-            int op2 = atoi(strsep(&s, " "));
-            int op3 = atoi(strsep(&s, " "));
-            int op4 = atoi(strsep(&s, " "));
-            int op5 = atoi(strsep(&s, " "));
-            int op6 = atoi(strsep(&s, " "));
-            
-            app[i++] = op6;
-            app[i++] = op5;
-            app[i++] = op4;
-            app[i++] = op3;
-            app[i++] = op2;
-            app[i++] = op1;
-            app[i++] = rdst;
-            app[i++] = -35;
-        }
         
         
         else if(strcmp(instr, ".ascii") == 0) {
@@ -525,7 +440,7 @@ int main(int argc, char **argv) {
             while(*p) app[j++] = *p++;
             app[j] = '\0';
         }
-        else if(strcmp(instr, ".goto") == 0) i += atoi(s);
+        else if(strcmp(instr, ".skip") == 0) i += atoi(s);
         else if(strcmp(instr, ".orig") == 0) {
             int new = atoi(s) + 4;
             if(i > new) fprintf(stderr, ".orig: warning: possible overflow\n");
