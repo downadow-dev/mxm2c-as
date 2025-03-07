@@ -256,22 +256,22 @@ int main(int argc, char **argv) {
             app[i++] = (strlen(src) > 3) ? -6 : -48;
         }
         else if(strcmp(instr, "isv") == 0) {
-            char *rsrc = strsep(&s, " ");
-            int dst = atoi(strsep(&s, " "));
+            int rsrc = atoi(strsep(&s, " "));
+            char *dst = strsep(&s, " ");
             
-            app[i++] = atoi(rsrc);
-            app[i++] = dst;
+            app[i++] = rsrc;
+            app[i++] = atoi(dst);
             
-            app[i++] = (strlen(rsrc) > 3) ? -8 : -45;
+            app[i++] = (strlen(dst) > 3) ? -8 : -45;
         }
         else if(strcmp(instr, "vsv") == 0) {
-            char *rsrc = strsep(&s, " ");
-            int dst = atoi(strsep(&s, " "));
+            int rsrc = atoi(strsep(&s, " "));
+            char *dst = strsep(&s, " ");
             
-            app[i++] = atoi(rsrc);
-            app[i++] = dst;
+            app[i++] = rsrc;
+            app[i++] = atoi(dst);
             
-            app[i++] = (strlen(rsrc) > 3) ? -9 : -46;
+            app[i++] = (strlen(dst) > 3) ? -9 : -46;
         }
         else if(strcmp(instr, "ld") == 0) {
             app[i++] = atoi(strsep(&s, " "));
