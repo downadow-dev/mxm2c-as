@@ -28,8 +28,8 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
     
-    signed char *app = malloc(10000000);
-    memset(app, '\0', 10000000);
+    int *app = malloc(10000000 * sizeof(int));
+    memset(app, '\0', 10000000 * sizeof(int));
     
     labels = malloc(sizeof(struct as_entry));
     labels->next = NULL;
@@ -73,6 +73,11 @@ int main(int argc, char **argv) {
                 strcmp(instr, "div") == 0 ||
                 strcmp(instr, "if") == 0) i += 4;
         else if(strcmp(instr, "mov") == 0 ||
+                strcmp(instr, "mov2") == 0 ||
+                strcmp(instr, "isv") == 0 ||
+                strcmp(instr, "vsv") == 0 ||
+                strcmp(instr, "ild") == 0 ||
+                strcmp(instr, "vld") == 0 ||
                 strcmp(instr, "ld") == 0) i += 3;
         else if(strcmp(instr, "slp") == 0 ||
                 strcmp(instr, "lslp") == 0 ||
@@ -81,17 +86,6 @@ int main(int argc, char **argv) {
                 strcmp(instr, "tnp") == 0 ||
                 strcmp(instr, "time") == 0 ||
                 strcmp(instr, "jmp") == 0) i += 2;
-        else if(strcmp(instr, "vld") == 0) {
-            *strchr(s, ' ') = '\0';
-            i += (strlen(s) < 3) ? 14 : 6;
-        }
-        else if(strcmp(instr, "ild") == 0) {
-            *strchr(s, ' ') = '\0';
-            i += (strlen(s) < 3) ? 16 : 8;
-        }
-        else if(strcmp(instr, "vsv") == 0) i += (strlen(strchr(s, ' ') + 1) < 3) ? 14 : 6;
-        else if(strcmp(instr, "isv") == 0) i += (strlen(strchr(s, ' ') + 1) < 3) ? 16 : 8;
-        else if(strcmp(instr, "mov2") == 0) i += 8;
         else if(strcmp(instr, ".skip") == 0) i += strtol(s, NULL, 0);
         else if(strcmp(instr, ".orig") == 0) i = strtol(s, NULL, 0);
         // создание метки
@@ -235,7 +229,7 @@ int main(int argc, char **argv) {
             app[i++] = rdst;
             app[i++] = -3;
         }
-        else if(strcmp(instr, "mov") == 0) {
+        else if(strcmp(instr, "mov") == 0 || strcmp(instr, "mov2") == 0) {
             int rdst = atoi(strsep(&s, " "));
             int src = atoi(strsep(&s, " "));
             
@@ -244,96 +238,40 @@ int main(int argc, char **argv) {
             app[i++] = -4;
         }
         else if(strcmp(instr, "ild") == 0) {
-            *strchr(s, ' ') = '\0';
-            if(strlen(s) > 3) {
-                for(int j = 6; j > 1; j--)
-                    app[i++] = s[j] - '0';
-                app[i++] = (s[0] - '0') * 10 + (s[1] - '0');
-                app[i++] = atoi(s + strlen(s) + 1);
-                app[i++] = -5;
-            } else {
-                char tmp[64];
-                app[i++] = atoi(s);
-                sprintf(tmp, "%07d", i + 7);
-                for(int j = 6; j > 1; j--) {
-                    app[i++] = tmp[j] - '0';
-                }
-                app[i++] = (tmp[0] - '0') * 10 + (tmp[1] - '0');
-                app[i++] = -8;
-                for(int j = 0; j < 6; j++)
-                    app[i++] = 0;
-                app[i++] = atoi(s + strlen(s) + 1);
-                app[i++] = -5;
-            }
+            char *src = strsep(&s, " ");
+            int rdst = atoi(strsep(&s, " "));
+            
+            app[i++] = atoi(src);
+            app[i++] = rdst;
+            
+            app[i++] = (strlen(src) > 3) ? -5 : -47;
         }
         else if(strcmp(instr, "vld") == 0) {
-            *strchr(s, ' ') = '\0';
-            if(strlen(s) > 3) {
-                for(int j = 3; j >= 0; j--)
-                    app[i++] = s[j] - '0';
-                app[i++] = atoi(s + strlen(s) + 1);
-                app[i++] = -6;
-            } else {
-                char tmp[64];
-                app[i++] = atoi(s);
-                sprintf(tmp, "%07d", i + 7);
-                for(int j = 6; j > 1; j--) {
-                    app[i++] = tmp[j] - '0';
-                }
-                app[i++] = (tmp[0] - '0') * 10 + (tmp[1] - '0');
-                app[i++] = -8;
-                for(int j = 0; j < 4; j++)
-                    app[i++] = 0;
-                app[i++] = atoi(s + strlen(s) + 1);
-                app[i++] = -6;
-            }
+            char *src = strsep(&s, " ");
+            int rdst = atoi(strsep(&s, " "));
+            
+            app[i++] = atoi(src);
+            app[i++] = rdst;
+            
+            app[i++] = (strlen(src) > 3) ? -6 : -48;
         }
         else if(strcmp(instr, "isv") == 0) {
-            char *last = strchr(s, ' ') + 1;
-            *(last - 1) = '\0';
-            if(strlen(last) > 3) {
-                app[i++] = atoi(s);
-                for(int j = 6; j > 1; j--)
-                    app[i++] = last[j] - '0';
-                app[i++] = (last[0] - '0') * 10 + (last[1] - '0');
-                app[i++] = -8;
-            } else {
-                char tmp[64];
-                app[i++] = atoi(last);
-                sprintf(tmp, "%07d", i + 8);
-                for(int j = 6; j > 1; j--) {
-                    app[i++] = tmp[j] - '0';
-                }
-                app[i++] = (tmp[0] - '0') * 10 + (tmp[1] - '0');
-                app[i++] = -8;
-                app[i++] = atoi(s);
-                for(int j = 0; j < 6; j++)
-                    app[i++] = 0;
-                app[i++] = -8;
-            }
+            char *rsrc = strsep(&s, " ");
+            int dst = atoi(strsep(&s, " "));
+            
+            app[i++] = atoi(rsrc);
+            app[i++] = dst;
+            
+            app[i++] = (strlen(rsrc) > 3) ? -8 : -45;
         }
         else if(strcmp(instr, "vsv") == 0) {
-            char *last = strchr(s, ' ') + 1;
-            *(last - 1) = '\0';
-            if(strlen(last) > 3) {
-                app[i++] = atoi(s);
-                for(int j = 3; j >= 0; j--)
-                    app[i++] = last[j] - '0';
-                app[i++] = -9;
-            } else {
-                char tmp[64];
-                app[i++] = atoi(last);
-                sprintf(tmp, "%07d", i + 8);
-                for(int j = 6; j > 1; j--) {
-                    app[i++] = tmp[j] - '0';
-                }
-                app[i++] = (tmp[0] - '0') * 10 + (tmp[1] - '0');
-                app[i++] = -8;
-                app[i++] = atoi(s);
-                for(int j = 0; j < 4; j++)
-                    app[i++] = 0;
-                app[i++] = -9;
-            }
+            char *rsrc = strsep(&s, " ");
+            int dst = atoi(strsep(&s, " "));
+            
+            app[i++] = atoi(rsrc);
+            app[i++] = dst;
+            
+            app[i++] = (strlen(rsrc) > 3) ? -9 : -46;
         }
         else if(strcmp(instr, "ld") == 0) {
             app[i++] = atoi(strsep(&s, " "));
@@ -419,15 +357,6 @@ int main(int argc, char **argv) {
             app[i++] = atoi(s);
             app[i++] = -43;
         }
-        else if(strcmp(instr, "mov2") == 0) {
-            char *last = strchr(s, ' ') + 1;
-            *(last - 1) = '\0';
-            for(int j = 6; j > 1; j--)
-                app[i++] = last[j] - '0';
-            app[i++] = (last[0] - '0') * 10 + (last[1] - '0');
-            app[i++] = atoi(s);
-            app[i++] = -31;
-        }
         
         
         else if(strcmp(instr, ".ascii") == 0) {
@@ -449,13 +378,13 @@ int main(int argc, char **argv) {
     }
     fclose(f);
     
-    if(!(f = fopen(argv[2], "wb"))) {
+    if(!(f = fopen(argv[2], "w"))) {
         perror("fopen");
         exit(EXIT_FAILURE);
     }
     
     for(int j = 0; j < i; j++)
-        fputc(app[j], f);
+        fprintf(f, "%d\n", app[j]);
     
     fclose(f);
 }
