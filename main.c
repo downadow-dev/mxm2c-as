@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
     
-    char buf[1024];
+    char buf[4096];
     // работа для создания меток и ссылок
     for(int i = 0; fgets(buf, sizeof(buf), f);) {
         char *s = buf;
