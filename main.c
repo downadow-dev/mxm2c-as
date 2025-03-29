@@ -79,9 +79,7 @@ int main(int argc, char **argv) {
                 strcmp(instr, "ild") == 0 ||
                 strcmp(instr, "vld") == 0 ||
                 strcmp(instr, "ld") == 0) i += 3;
-        else if(strcmp(instr, "slp") == 0 ||
-                strcmp(instr, "lslp") == 0 ||
-                strcmp(instr, "inc") == 0 ||
+        else if(strcmp(instr, "inc") == 0 ||
                 strcmp(instr, "dec") == 0 ||
                 strcmp(instr, "tnp") == 0 ||
                 strcmp(instr, "time") == 0 ||
@@ -278,10 +276,6 @@ int main(int argc, char **argv) {
             app[i++] = atoi(strsep(&s, " "));
             app[i++] = -7;
         }
-        else if(strcmp(instr, "slp") == 0) {
-            app[i++] = atoi(s);
-            app[i++] = -10;
-        }
         else if(strcmp(instr, "if") == 0) {
             int op1 = atoi(strsep(&s, " "));
             char type = *strsep(&s, " ");
@@ -326,10 +320,6 @@ int main(int argc, char **argv) {
             app[i++] = r1;
             app[i++] = rdst;
             app[i++] = -22;
-        }
-        else if(strcmp(instr, "lslp") == 0) {
-            app[i++] = atoi(s);
-            app[i++] = -23;
         }
         else if(strcmp(instr, "inc") == 0) {
             app[i++] = atoi(s);
