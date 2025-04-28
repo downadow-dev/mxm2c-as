@@ -74,6 +74,7 @@ int main(int argc, char **argv) {
                 strcmp(instr, "if") == 0) i += 4;
         else if(strcmp(instr, "mov") == 0 ||
                 strcmp(instr, "mov2") == 0 ||
+                strcmp(instr, "call") == 0 ||
                 strcmp(instr, "isv") == 0 ||
                 strcmp(instr, "vsv") == 0 ||
                 strcmp(instr, "ild") == 0 ||
@@ -300,6 +301,14 @@ int main(int argc, char **argv) {
         else if(strcmp(instr, "jmp") == 0) {
             app[i++] = atoi(s);
             app[i++] = -18;
+        }
+        else if(strcmp(instr, "call") == 0) {
+            int reg = atoi(strsep(&s, " "));
+            int addr = atoi(strsep(&s, " "));
+            
+            app[i++] = addr;
+            app[i++] = reg;
+            app[i++] = -10;
         }
         else if(strcmp(instr, "mul") == 0) {
             int r1 = atoi(strsep(&s, " "));
