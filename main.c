@@ -417,7 +417,7 @@ int preprocess(char *s_buf) {
             else if(*p == ',')
                 *p = ' ';
             else if(p[0] == '\'' && p[1] && p[2] == '\'') {
-                char tmp[4];
+                char tmp[5];
                 sprintf(tmp, "%d", (int)p[1]);
                 memmove(p + strlen(tmp), p + 3, strlen(p + 3) + 1);
                 memcpy(p, tmp, strlen(tmp));
@@ -456,7 +456,7 @@ int preprocess(char *s_buf) {
                     memcpy(buf, p + 1, (endp - 1) - p);
                     
                     struct as_entry *ent = labels;
-                    while(ent = ent->next) {
+                    while((ent = ent->next)) {
                         if(strcmp(ent->name, buf) == 0) {
                             memmove(p + strlen(ent->value), endp + 1, strlen(endp) + 1);
                             memcpy(p, ent->value, strlen(ent->value));
@@ -478,7 +478,7 @@ int preprocess(char *s_buf) {
                     memcpy(buf, p + 1, (endp - 1) - p);
                     
                     struct as_entry *ent = refs;
-                    while(ent = ent->next) {
+                    while((ent = ent->next)) {
                         if(strcmp(ent->name, buf) == 0) {
                             memmove(p + strlen(ent->value), endp + 1, strlen(endp) + 1);
                             memcpy(p, ent->value, strlen(ent->value));
